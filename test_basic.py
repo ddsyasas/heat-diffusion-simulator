@@ -13,6 +13,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from heat_diffusion import HeatDiffusionSimulator
+from initial_conditions import get_initial_condition
 
 
 def test_basic_simulation():
@@ -22,9 +23,9 @@ def test_basic_simulation():
     # Create simulator
     simulator = HeatDiffusionSimulator(alpha=0.01, L=1.0, nx=50, t_end=2.0)
     
-    # Create simple initial condition (hot in the middle)
+    # Create simple initial condition (hot in the middle) via helper
     x = simulator.x
-    T_initial = np.exp(-((x - 0.5) / 0.1)**2)  # Gaussian-like initial condition
+    T_initial = get_initial_condition('gaussian', center=0.5, width=0.1, amplitude=1.0)(x)
     
     print(f"Initial condition: Gaussian peak at x=0.5")
     print(f"Initial temperature range: [{T_initial.min():.3f}, {T_initial.max():.3f}] K")
@@ -69,6 +70,12 @@ def test_stability_condition():
     except Exception as e:
         print(f"Error with high resolution: {e}")
 
+    # Validate boundary condition names
+    try:
+        _ = simulator_stable.simulate(T_initial=np.ones_like(simulator_stable.x), bc_type='invalid')
+    except ValueError as e:
+        print(f"Caught expected invalid BC error: {e}")
+
 
 if __name__ == "__main__":
     print("Day 2: Core Physics Implementation Test")
@@ -86,3 +93,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         sys.exit(1)
+
