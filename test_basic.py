@@ -14,6 +14,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from heat_diffusion import HeatDiffusionSimulator
 from initial_conditions import get_initial_condition
+from plotting import plot_temperature_profile, plot_temperature_evolution
+from data_io import save_simulation_npz, export_csv, ensure_dir
 
 
 def test_basic_simulation():
@@ -50,6 +52,16 @@ def test_basic_simulation():
     
     print(f"  Energy change: {energy_change:.2f}%")
     
+    # Save outputs (Day 4)
+    out_dir = os.path.join("results", "day4_basic")
+    ensure_dir(out_dir)
+    plot_temperature_profile(x, T_history[-1], title="Final Temperature Profile", save_path=os.path.join(out_dir, "profile.png"), show=False)
+    plot_temperature_evolution(x, t, T_history, n_snapshots=8, title="Temperature Evolution", save_path=os.path.join(out_dir, "evolution.png"), show=False)
+
+    params = {"alpha": 0.01, "L": 1.0, "nx": 50, "t_end": 2.0, "ic": "gaussian"}
+    save_simulation_npz(x=x, t=t, T_history=T_history, parameters=params, output_path=os.path.join(out_dir, "data.npz"))
+    export_csv(x=x, t=t, T_history=T_history, output_path=os.path.join(out_dir, "data.csv"))
+
     return x, t, T_history
 
 
